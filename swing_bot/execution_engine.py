@@ -21,9 +21,9 @@ def is_market_hours(config):
     if not hours:
         return True
     t = _utcnow().time()
-    start = hours.get("start_utc", "14:30")  # 9:30 ET
-    end = hours.get("end_utc", "21:00")     # 16:00 ET
-    # Parse "HH:MM"
+    start = hours.get("start_utc", "14:30")
+    end = hours.get("end_utc", "21:00")
+
     def to_minutes(s):
         h, m = s.split(":")[:2]
         return int(h) * 60 + int(m)
@@ -54,8 +54,8 @@ class ExecutionRules:
         self.max_capital_per_trade_pct = self.exec_cfg.get("max_capital_per_trade_pct", 10.0) / 100.0
         self.max_risk_per_trade_pct = self.exec_cfg.get("max_risk_per_trade_pct", 1.0) / 100.0
         self.available_capital = self.exec_cfg.get("available_capital", 0.0)
-        self.current_positions = set()  # tickers; in production load from broker
-        self.positions_value = {}       # ticker -> notional; in production from broker
+        self.current_positions = set()
+        self.positions_value = {}
 
     def check_market_hours(self):
         if not is_market_hours(self.config):

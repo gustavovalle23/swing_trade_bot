@@ -115,7 +115,11 @@ The engine loads the latest signals, checks market hours, position limits, capit
 
 ## Signals JSON (structure)
 
-Written by the screener; read by the execution engine.
+Written by the screener; read by the execution engine. Each opportunity includes **intrinsic value** and **margin of safety** (Benjamin Graham, *The Intelligent Investor*) so you can prefer names trading well below estimated value.
+
+- **intrinsic_value** — Graham-style estimate: EPS × (8.5 + 2g), with g = earnings growth % (capped). How much the company is estimated to be worth per share.
+- **eps** — Earnings per share (latest from SEC).
+- **margin_of_safety_pct** — (intrinsic_value − price) / intrinsic_value × 100. Positive = trading below IV (buffer against mistakes or volatility); negative = trading above IV.
 
 ```json
 {
@@ -137,7 +141,10 @@ Written by the screener; read by the execution engine.
       "atr_pct": 1.8,
       "breakout": true,
       "revenue_growth_pct": 8.5,
-      "net_income_growth_pct": 12.1
+      "net_income_growth_pct": 12.1,
+      "eps": 6.42,
+      "intrinsic_value": 185.20,
+      "margin_of_safety_pct": 5.24
     }
   ]
 }

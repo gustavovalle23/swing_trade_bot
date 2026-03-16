@@ -85,6 +85,8 @@ def build_ranked_rows(rows, config):
                 "current_ratio": row["fundamental"]["current_ratio"],
                 "recent_forms": row["fundamental"]["recent_forms"],
                 "headline_count": len(row["news"]),
+                "eps": row["fundamental"].get("eps"),
+                "intrinsic_value": row["fundamental"].get("intrinsic_value"),
             }
         )
     out.sort(key=lambda x: x["total_score"], reverse=True)

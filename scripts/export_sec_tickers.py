@@ -12,7 +12,7 @@ URL = "https://www.sec.gov/files/company_tickers.json"
 
 
 def main():
-    limit = int(os.getenv("TICKER_LIMIT", "0"))  # 0 = no limit
+    limit = int(os.getenv("TICKER_LIMIT", "0"))
     r = requests.get(URL, headers={"User-Agent": USER_AGENT}, timeout=30)
     r.raise_for_status()
     data = r.json()

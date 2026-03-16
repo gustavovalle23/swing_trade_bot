@@ -54,6 +54,13 @@ def build_opportunities(ranked_rows, config):
         if row["total_score"] < min_score:
             continue
         params = _trade_params(row, sig_cfg)
+
+        iv = row.get("intrinsic_value")
+        close = row["close"]
+        margin_of_safety_pct = None
+        if iv is not None and iv > 0 and close is not None and close > 0:
+            margin_of_safety_pct = round((iv - close) / iv * 100, 2)
+
         opp = {
             "ticker": row["ticker"],
             "score": row["total_score"],
@@ -71,6 +78,9 @@ def build_opportunities(ranked_rows, config):
             "breakout": row["breakout"],
             "revenue_growth_pct": row.get("revenue_growth_pct"),
             "net_income_growth_pct": row.get("net_income_growth_pct"),
+            "eps": row.get("eps"),
+            "intrinsic_value": iv,
+            "margin_of_safety_pct": margin_of_safety_pct,
         }
         opportunities.append(opp)
         if len(opportunities) >= max_opportunities:

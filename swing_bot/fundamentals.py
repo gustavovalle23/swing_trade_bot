@@ -10,6 +10,9 @@ USD_TAGS = {
     "current_liabilities": ["LiabilitiesCurrent"],
 }
 
+GRAHAM_GROWTH_CAP_PCT = 15.0
+GRAHAM_BASE_MULTIPLE = 8.5
+
 
 def parse_date(value):
     return datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=timezone.utc)
@@ -36,6 +39,44 @@ def extract_series(facts, tags):
                     dedup[row["end"]] = row
                 return list(dedup.values())
     return []
+
+
+def extract_shares_outstanding(facts):
+    """Latest common shares outstanding from SEC companyfacts (dei or us-gaap)."""
+    for namespace in ("dei", "us-gaap"):
+        data = facts.get("facts", {}).get(namespace, {})
+        for tag in ("EntityCommonStockSharesOutstanding", "CommonStockSharesOutstanding", "CommonStockSharesOutstandingOther"):
+            node = data.get(tag, {})
+            units = node.get("units", {})
+            for unit_key in ("shares", "pure", "USD"):
+                items = units.get(unit_key, [])
+                if not items:
+                    continue
+                rows = []
+                for item in items:
+                    end = item.get("end")
+                    val = item.get("val")
+                    form = item.get("form", "")
+                    if end is not None and val is not None and val > 0:
+                        rows.append({"end": end, "val": float(val), "form": form})
+                if rows:
+                    rows.sort(key=lambda x: x["end"])
+                    return rows[-1]["val"]
+    return None
+
+
+def graham_intrinsic_value(eps, growth_pct, growth_cap_pct=GRAHAM_GROWTH_CAP_PCT, base=GRAHAM_BASE_MULTIPLE):
+    """
+    Benjamin Graham (The Intelligent Investor): IV = EPS × (8.5 + 2g).
+    g = expected annual earnings growth %, capped for conservatism.
+    Returns IV per share or None if invalid.
+    """
+    if eps is None or eps <= 0:
+        return None
+    g = growth_pct if growth_pct is not None else 0
+    g = min(max(g, 0), growth_cap_pct)
+    mult = base + 2 * g
+    return round(eps * mult, 2)
 
 
 def growth_from_last_two(series):
@@ -72,6 +113,8 @@ def build_fundamental_snapshot(sec, ticker, cfg):
             "debt_to_assets": None,
             "current_ratio": None,
             "recent_forms": {},
+            "eps": None,
+            "intrinsic_value": None,
         }
 
     facts = sec.companyfacts(cik)
@@ -97,6 +140,19 @@ def build_fundamental_snapshot(sec, ticker, cfg):
 
     forms = recent_form_counts(submissions, cfg["recent_form_window_days"])
 
+    shares = extract_shares_outstanding(facts)
+    eps = None
+    intrinsic_value = None
+    if net_income and shares and shares > 0:
+        eps = round(net_income[-1]["val"] / shares, 4)
+        growth_cap = cfg.get("graham_growth_cap_pct", GRAHAM_GROWTH_CAP_PCT)
+        intrinsic_value = graham_intrinsic_value(
+            eps,
+            net_income_growth,
+            growth_cap_pct=growth_cap,
+            base=cfg.get("graham_base_multiple", GRAHAM_BASE_MULTIPLE),
+        )
+
     checks = [
         revenue_growth is not None and revenue_growth >= cfg["revenue_growth_min_pct"],
         net_income_growth is not None and net_income_growth >= cfg["net_income_growth_min_pct"],
@@ -115,4 +171,6 @@ def build_fundamental_snapshot(sec, ticker, cfg):
         "debt_to_assets": round(debt_to_assets, 4) if debt_to_assets is not None else None,
         "current_ratio": round(current_ratio, 4) if current_ratio is not None else None,
         "recent_forms": forms,
+        "eps": eps,
+        "intrinsic_value": intrinsic_value,
     }
