@@ -8,7 +8,6 @@ class SecClient:
             {
                 "User-Agent": user_agent,
                 "Accept-Encoding": "gzip, deflate",
-                "Host": "data.sec.gov",
             }
         )
         self._ticker_map = None
