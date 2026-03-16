@@ -1,0 +1,48 @@
+{
+    "loop_seconds": 300,
+    "tickers": [
+        "AAPL",
+        "MSFT",
+        "NVDA",
+        "AMZN",
+        "META",
+        "GOOGL",
+        "TSLA"
+    ],
+    "market": {
+        "history_period": "1y",
+        "history_interval": "1d"
+    },
+    "technical": {
+        "sma_fast": 20,
+        "sma_slow": 50,
+        "rsi_length": 14,
+        "rsi_min": 45,
+        "rsi_max": 68,
+        "atr_length": 14,
+        "atr_pct_max": 6,
+        "breakout_lookback": 20,
+        "volume_lookback": 20,
+        "volume_multiple_min": 1.2
+    },
+    "fundamental": {
+        "revenue_growth_min_pct": 5,
+        "net_income_growth_min_pct": 5,
+        "debt_to_assets_max": 0.7,
+        "current_ratio_min": 1,
+        "recent_form_window_days": 120,
+        "fresh_report_min_count": 1
+    },
+    "news": {
+        "headline_limit": 8
+    },
+    "weights": {
+        "technical": 0.4,
+        "fundamental": 0.35,
+        "news": 0.15,
+        "admin": 0.1
+    },
+    "output": {
+        "top_n": 10
+    }
+}
