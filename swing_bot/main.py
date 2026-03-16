@@ -92,7 +92,8 @@ def run():
         log.info("Ranked %d opportunities", len(rows))
         ranked = build_ranked_rows(rows, config)
         opportunities = build_opportunities(ranked, config)
-        log.info("Qualified setups: %d (written to %s)", len(opportunities), signals_path)
+        opportunities.sort(key=lambda o: o["score"], reverse=True)
+        log.info("Qualified setups: %d (written to %s, ordered by score)", len(opportunities), signals_path)
 
         out_payload = {
             "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
