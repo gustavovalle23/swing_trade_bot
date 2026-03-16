@@ -4,6 +4,12 @@ A **swing-trading screener** that scans a large universe of stocks (e.g. 3000) w
 
 ---
 
+## Disclaimer
+
+**This project is for educational and research purposes only. It is not financial, investment, or legal advice.** The author is **not responsible** for any losses you incur from using this software or acting on its output. Trading involves substantial risk of loss. You must **verify all strategies and signals yourself** and do your own due diligence before placing any trade. Past performance of the screener or of any suggested setup does not guarantee future results. Use at your own risk.
+
+---
+
 ## Project goal
 
 - **Scan at scale** — Use a ticker file (e.g. 3000 symbols) or the config watchlist; history is downloaded in chunks and each symbol is evaluated in parallel.
@@ -11,6 +17,19 @@ A **swing-trading screener** that scans a large universe of stocks (e.g. 3000) w
 - **Rank and qualify** — Each ticker gets a total score (0–100). Only those above a minimum score become “opportunities” with **trade parameters**: entry, stop loss, target.
 - **Structured output** — Results are written to **signals JSON** (path in config), not just logged. The file includes `generated_at`, and for each opportunity: `ticker`, `score`, `setup_type`, `entry`, `stop_loss`, `target`, plus technical/fundamental detail.
 - **Execution is separate** — An **execution engine** reads the signals file, checks market hours, position limits, available capital, risk per trade, and whether the symbol is already held. Only then does it call a broker API (you implement the broker adapter). This prevents analysis bugs from directly moving money and makes the flow auditable and scalable.
+
+---
+
+## Understanding scores
+
+The **total score** is 0–100: a weighted mix of **technical** (e.g. 40%), **fundamental** (e.g. 35%), **news** (e.g. 15%), and **admin** (e.g. 10%). Each subscore is also 0–100. So a “good” score is relative to your filters and universe, but as a rule of thumb:
+
+- **50–60** — Meets the default minimum to appear in signals; worth a look but do your own check.
+- **60–70** — Solid: several criteria (trend, RSI, fundamentals, news) are aligned; treat as candidates, not automatic trades.
+- **70–80** — Strong: technical and fundamental picture line up; still verify entry/exit and risk.
+- **80+** — Among the best-ranked ideas in the scan; even so, a high score does **not** guarantee profit—always confirm the setup and manage risk yourself.
+
+Scores are a **ranking and filter tool**, not a promise of returns. A stock can have a high score and still lose money; a lower-scored name might work better in your own strategy. Verify every opportunity before trading.
 
 ---
 
