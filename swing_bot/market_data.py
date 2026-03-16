@@ -18,7 +18,7 @@ def _download_one(tickers, period, interval):
         tickers=tickers,
         period=period,
         interval=interval,
-        auto_adjust=False,
+        auto_adjust=True,
         group_by="ticker",
         progress=False,
         threads=True,

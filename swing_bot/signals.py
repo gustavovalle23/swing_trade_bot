@@ -58,8 +58,13 @@ def build_opportunities(ranked_rows, config):
         iv = row.get("intrinsic_value")
         close = row["close"]
         margin_of_safety_pct = None
+        price_iv_ratio = None
+        price_iv_warning = False
         if iv is not None and iv > 0 and close is not None and close > 0:
             margin_of_safety_pct = round((iv - close) / iv * 100, 2)
+            price_iv_ratio = round(close / iv, 2)
+            if price_iv_ratio > 3.0 or price_iv_ratio < 0.33:
+                price_iv_warning = True
 
         opp = {
             "ticker": row["ticker"],
@@ -81,6 +86,8 @@ def build_opportunities(ranked_rows, config):
             "eps": row.get("eps"),
             "intrinsic_value": iv,
             "margin_of_safety_pct": margin_of_safety_pct,
+            "price_iv_ratio": price_iv_ratio,
+            "price_iv_warning": price_iv_warning,
         }
         opportunities.append(opp)
         if len(opportunities) >= max_opportunities:

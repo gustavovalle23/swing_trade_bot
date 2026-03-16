@@ -33,6 +33,15 @@ Scores are a **ranking and filter tool**, not a promise of returns. A stock can 
 
 ---
 
+## Data and consistency
+
+- **Price (close, entry, stop, target)** — Sourced from yfinance with **split- and dividend-adjusted** prices (`auto_adjust=True`). All prices are in **current US dollars per share**, so they are comparable to each other and to intrinsic value. Unadjusted data could show wrong scale (e.g. pre-split levels or inconsistent units).
+- **Intrinsic value** — Benjamin Graham–style estimate from SEC data (EPS × (8.5 + 2g)); same dollar-per-share scale as price.
+- **price_iv_ratio** — `close / intrinsic_value`. Far from 1.0 may indicate a data issue (wrong ticker, scaling, or feed).
+- **price_iv_warning** — Set to `true` when `price_iv_ratio > 3` or `< 0.33`. Use it to double-check ticker mapping, price source, or formula before trusting the signal.
+
+---
+
 ## How to make money from it
 
 1. **Run the screener** — Use a 3000-ticker file (see below) or a smaller watchlist. Set `loop_seconds` (e.g. 300) or `0` for a single “top of day” run. The screener writes the best setups to `signals.json`.
@@ -119,7 +128,9 @@ Written by the screener; read by the execution engine. Each opportunity includes
 
 - **intrinsic_value** — Graham-style estimate: EPS × (8.5 + 2g), with g = earnings growth % (capped). How much the company is estimated to be worth per share.
 - **eps** — Earnings per share (latest from SEC).
-- **margin_of_safety_pct** — (intrinsic_value − price) / intrinsic_value × 100. Positive = trading below IV (buffer against mistakes or volatility); negative = trading above IV.
+- **margin_of_safety_pct** — (intrinsic_value − price) / intrinsic_value × 100. Positive = trading below IV (buffer); negative = trading above IV.
+- **price_iv_ratio** — close / intrinsic_value. Use to spot scale or data issues.
+- **price_iv_warning** — true when price and IV are far out of line (ratio &gt; 3 or &lt; 0.33); double-check data before trusting the signal.
 
 ```json
 {
@@ -144,7 +155,9 @@ Written by the screener; read by the execution engine. Each opportunity includes
       "net_income_growth_pct": 12.1,
       "eps": 6.42,
       "intrinsic_value": 185.20,
-      "margin_of_safety_pct": 5.24
+      "margin_of_safety_pct": 5.24,
+      "price_iv_ratio": 0.95,
+      "price_iv_warning": false
     }
   ]
 }
