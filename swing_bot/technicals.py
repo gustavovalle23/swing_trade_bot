@@ -26,14 +26,18 @@ def build_technical_snapshot(df, cfg):
     rsi_series = rsi(close, cfg["rsi_length"])
     atr_series = atr(df, cfg["atr_length"])
     high_n = close.rolling(cfg["breakout_lookback"]).max()
+    low_n = df["Low"].rolling(cfg["breakout_lookback"]).min()
     vol_avg = volume.rolling(cfg["volume_lookback"]).mean()
 
     last_close = float(close.iloc[-1])
     last_sma_fast = float(sma_fast.iloc[-1])
     last_sma_slow = float(sma_slow.iloc[-1])
     last_rsi = float(rsi_series.iloc[-1])
-    last_atr_pct = float((atr_series.iloc[-1] / close.iloc[-1]) * 100)
+    last_atr = float(atr_series.iloc[-1])
+    last_atr_pct = float((last_atr / close.iloc[-1]) * 100)
     breakout = last_close >= float(high_n.iloc[-2]) if len(high_n) > 1 else False
+    recent_high = float(high_n.iloc[-2]) if len(high_n) > 1 else last_close
+    recent_low = float(low_n.iloc[-1]) if len(low_n) > 0 else last_close
     volume_confirm = float(volume.iloc[-1]) >= float(vol_avg.iloc[-1]) * cfg["volume_multiple_min"]
 
     checks = [
@@ -53,6 +57,9 @@ def build_technical_snapshot(df, cfg):
         "sma_slow": round(last_sma_slow, 4),
         "rsi": round(last_rsi, 2) if not math.isnan(last_rsi) else None,
         "atr_pct": round(last_atr_pct, 2) if not math.isnan(last_atr_pct) else None,
+        "atr_abs": round(last_atr, 4) if not math.isnan(last_atr) else None,
         "breakout": breakout,
         "volume_confirm": volume_confirm,
+        "recent_high": round(recent_high, 4),
+        "recent_low": round(recent_low, 4),
     }
